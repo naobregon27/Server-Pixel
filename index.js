@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Asegura que req.body funcione correctamente
 
 // Conexión a MongoDB con manejo de eventos
-mongoose.connect("mongodb+srv://naobregon27:83nMg3x1iTzSKZfG@kommo.xa9nxvx.mongodb.net/")
+mongoose.connect("mongodb+srv://lauraahora4632025:hXqOPPuQ1INnrtkX@ahora4633.kcvqn5q.mongodb.net/")
   .then(() => {
     console.log('✅ Conexión exitosa a MongoDB Atlas');
   })
