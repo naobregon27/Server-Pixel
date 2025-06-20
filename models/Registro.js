@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const registroSchema = new mongoose.Schema({
+const registroMacleynSchema = new mongoose.Schema({
     id: String,
     token: String,
     pixel: String,
@@ -15,4 +15,4 @@ const registroSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('Registro', registroSchema);
+module.exports = mongoose.model('RegistroMacleyn', registroMacleynSchema);

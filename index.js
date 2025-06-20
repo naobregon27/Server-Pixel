@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const Registro = require("./models/Registro");
+const RegistroMacleyn = require("./models/Registro");
 const axios = require('axios');
 
 const app = express();
@@ -12,10 +12,27 @@ app.use(require("cors")());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Asegura que req.body funcione correctamente
 
-// Conexión a MongoDB
-mongoose.connect(
-  "mongodb+srv://naobregon27:83nMg3x1iTzSKZfG@kommo.xa9nxvx.mongodb.net/"
-);
+// Conexión a MongoDB con manejo de eventos
+mongoose.connect("mongodb+srv://naobregon27:83nMg3x1iTzSKZfG@kommo.xa9nxvx.mongodb.net/")
+  .then(() => {
+    console.log('✅ Conexión exitosa a MongoDB Atlas');
+  })
+  .catch(err => {
+    console.error('❌ Error de conexión a MongoDB:', err.message);
+  });
+
+// Eventos adicionales de conexión
+mongoose.connection.on('connected', () => {
+  console.log('🟢 MongoDB conectado');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('🔴 Error en la conexión de MongoDB:', err.message);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('🟡 MongoDB desconectado');
+});
 
 const isValidIP = (ip) => {
   const regex =
@@ -43,13 +60,13 @@ app.post("/guardar", async (req, res) => {
     }
 
     // 3. Evitar duplicados si el ID ya existe
-    const existente = await Registro.findOne({ id });
+    const existente = await RegistroMacleyn.findOne({ id });
     if (existente) {
       return res.status(409).json({ error: "Este ID ya fue registrado" });
     }
 
     // 4. Guardar en la base de datos
-    const nuevoRegistro = new Registro({
+    const nuevoRegistro = new RegistroMacleyn({
       id,
       token,
       pixel,
@@ -84,7 +101,7 @@ app.post("/verificacion", async (req, res) => {
     console.log("🧾 ID del contacto:", contacto.id);
 
     // Paso 1: Traer el LEAD completo
-    const leadResponse = await axios.get(`https://luchito4637.kommo.com/api/v4/leads/${leadId}`, {
+    const leadResponse = await axios.get(`https://blackpanther1.kommo.com/api/v4/leads/${leadId}`, {
       headers: {
         'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImVmNmE0MzhhYjA1NzBiZGM2MzZlMzZhNjYxNzc0MTRlMWE2N2M4YWU1ZjlhM2FlMzVhM2U1NDBjZmVlNTQ0YTQyY2E3MzJkNzQ3Yzk2MWNjIn0.eyJhdWQiOiJhMGE2ZjdmNC0xZWM2LTQ2MDgtOTc2OC1kODhkNTkxZmNiYTIiLCJqdGkiOiJlZjZhNDM4YWIwNTcwYmRjNjM2ZTM2YTY2MTc3NDE0ZTFhNjdjOGFlNWY5YTNhZTM1YTNlNTQwY2ZlZTU0NGE0MmNhNzMyZDc0N2M5NjFjYyIsImlhdCI6MTc1MDM3NjUxNCwibmJmIjoxNzUwMzc2NTE0LCJleHAiOjE3NjI2NDY0MDAsInN1YiI6IjEyMzkyMjY3IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjMzODg1Mzc1LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJjcm0iLCJmaWxlcyIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiLCJwdXNoX25vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiZjRjYTNhNjMtZjBiMS00MDBmLWFhMzMtN2E1YWRmZmY2YzUwIiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.REbQoMKKYrW9i6mBWru7-au3vprf8pQVi_REI664sxOB1410DuatdDoK0kFGEKCznqI-vUv_q1IongKpqSG-7MgZE_X7a5AMcG1AqpgbRHsoCcSde7JMqxhxm7QzD-bS8y4LYzRyRq0Z-QjspgxdqT67SrIFnfB1AonRgW1CwqG99SF_LM8f5_RlHworxnB0t90Dx-0ztjwMf32iavcchs8n91iMZmriFVLs-nQBezHLCpqlHrPSmdZLeTQn_w2Fdv2SqsXFMOXhjlKyIwckz3fEsn0MGstGZw9J-9xe1hzIa3xIEKQytuhuDUN_FiUU9fG839n-Xb13O2h-RsA7Tw'
       }
@@ -105,7 +122,7 @@ app.post("/verificacion", async (req, res) => {
 
     // Paso 4: Buscar en MongoDB si ese ID existe
     if (idExtraido) {
-      const registro = await Registro.findOne({ id: idExtraido });
+      const registro = await RegistroMacleyn.findOne({ id: idExtraido });
   // Ejecutar pixel de Meta (API de Conversiones)
   if (registro) {
   console.log("✅ Registro encontrado:", registro);
@@ -152,7 +169,7 @@ res.sendStatus(200);
 
 
 async function obtenerContactoDesdeLead(leadId) {
-  const url = `https://luchito4637.kommo.com/api/v4/leads/${leadId}?with=contacts`;
+  const url = `https://blackpanther1.kommo.com/api/v4/leads/${leadId}?with=contacts`;
 
   try {
     const response = await axios.get(url, {
@@ -180,7 +197,7 @@ async function obtenerContactoDesdeLead(leadId) {
 }
 
 async function obtenerDatosDelContacto(contactId) {
-  const url = `https://luchito4637.kommo.com/api/v4/contacts/${contactId}`;
+  const url = `https://blackpanther1.kommo.com/api/v4/contacts/${contactId}`;
 
   try {
     const response = await axios.get(url, {
